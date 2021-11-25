@@ -10,11 +10,11 @@ const HTTP_NO_CONTENT = 204
  * @return {Promise<Object>}
  */
 async function jsonFetch (url, params = {}) {
-  // Si on reçoit un FormData on le convertit en objet
+  // Convert FormData to object
   if (params.body instanceof FormData) {
     params.body = Object.fromEntries(params.body)
   }
-  // Si on reçoit un objet on le convertit en chaine JSON
+  // Convert object to string (json)
   if (params.body && typeof params.body === 'object') {
     params.body = JSON.stringify(params.body)
   }
