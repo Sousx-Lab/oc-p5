@@ -7,7 +7,7 @@ const HTTP_NO_CONTENT = 204
 /**
  * @param {RequestInfo} url
  * @param {object} params
- * @return {Promise<Object>}
+ * @returns {Promise<object>}
  */
 async function jsonFetch (url, params = {}) {
   // Convert FormData to object
@@ -43,7 +43,7 @@ async function jsonFetch (url, params = {}) {
 /**
  * @param {RequestInfo} url
  * @param {object} params
- * @return {Promise<Object>}
+ * @return {Promise<object>} Promise
  */
  export async function jsonFetchOrFlash(url, params = {}) {
    

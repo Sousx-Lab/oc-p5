@@ -1,13 +1,16 @@
 import { ProductsCard } from "./pages/HomePage.js";
 import { ProductDetails } from "./pages/ProductPage.js";
 
-function HomePage(){
+function App(){
+    
     let items =  document.getElementById('items')
-    ProductsCard(items)
-}HomePage();
-
-function ProductPage(){
-    if(window.location.pathname.includes('product.html')){
-        ProductDetails()
+    if(items instanceof HTMLElement){
+        ProductsCard(items)
+        return;
     }
-}ProductPage();
+    
+    if(window.location.pathname.includes('product.html')){
+        ProductDetails();
+        return
+    }
+}App()
