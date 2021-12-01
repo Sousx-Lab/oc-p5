@@ -1,8 +1,8 @@
 import { jsonFetchOrFlash } from "../functions/api.js";
 import { API } from "../conf.js";
 import { Product } from '../entity/product.js'
-import { flash } from "../functions/flash.js";
-
+import { Flash } from "../functions/flash.js";
+import { Cart, CartItem } from "../entity/cart.js";
 /**
  * define type of targetElems
  * @typedef {object} targetElems
@@ -32,7 +32,7 @@ export const ProductDetails = () => {
 
             /**@type {targetElems} */
             const awaitSubmit = insertProduct(Product)
-            handleSubmit(awaitSubmit)
+            handleSubmit(Product._id, awaitSubmit)
         })
 
 }
@@ -69,7 +69,6 @@ function insertProduct(product) {
         selectColor.add(option, null)
     })
 
-    /**@type {targetElems}*/
     const targetElems = {
         selectedColor: selectColor,
         quantity: document.getElementById('quantity'),
@@ -80,23 +79,35 @@ function insertProduct(product) {
 }
 
 /**
- * @param {targetElems} target 
+ * @param {targetElems} target
+ * @param {string} id
  */
-function handleSubmit(target) {
+function handleSubmit(id, target) {
 
     target.submitButton.addEventListener('click', function (e) {
         e.preventDefault();
         let selectedColorValue = target.selectedColor.options[target.selectedColor.selectedIndex].value
         let quantity = parseInt(target.quantity.value, 10)
 
-        if (!selectedColorValue) {
-            flash.error('Veuillez sélectionner une couleur !')
+        if (selectedColorValue) {
+            if (quantity <= 0 || quantity > 100) {
+                target.quantity.value = 1
+            }
+            /**@type {CartItem} */
+            let item =  CartItem
+            item.id = id, 
+            item.color = selectedColorValue, 
+            item.quantities = parseInt(target.quantity.value, 10)
+
+            Cart.addItem(item)
+            Flash.success('Le produit a bien été ajouté au panier')
+
+        }else{
+            Flash.error('Veuillez sélectionner une couleur !')
             document.querySelector("label[for='color-select']").style.color = "red"
         }
-        if (quantity <= 0 || quantity > 100) {
-            target.quantity.value = "1"
-        }
-
+        
+        
     })
 
 }

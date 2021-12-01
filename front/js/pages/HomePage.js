@@ -10,6 +10,9 @@ export const ProductsCard = (items) => {
    
     jsonFetchOrFlash(API.PRODUCTS, {method: 'GET'})
     .then(function(data) {
+        if(!data){
+            return;
+        }
         data.forEach((p) =>{
             items.insertAdjacentHTML('beforeend', Card(Object.assign(Product, p)))
         })
