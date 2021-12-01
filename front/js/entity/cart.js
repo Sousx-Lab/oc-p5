@@ -5,7 +5,7 @@ export const Cart = {
     addItem(obj) {
         let currentItems = this.getAll('cart')
         if (currentItems instanceof Array) {
-            currentItems.map(e =>{
+            currentItems.forEach(e =>{
                 
                 if (e.id === obj.id && e.color !== obj.color && 
                     currentItems.find(({ color }) => color === obj.color) === undefined) {                
