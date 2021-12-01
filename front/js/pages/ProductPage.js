@@ -100,10 +100,10 @@ function handleSubmit(id, target) {
             item.quantities = parseInt(target.quantity.value, 10)
 
             Cart.addItem(item)
-            Flash.success('Le produit a bien été ajouté au panier')
-
+            Flash.success(null, 'Le produit a bien été ajouté au panier')
+            
         }else{
-            Flash.error('Veuillez sélectionner une couleur !')
+            Flash.error(null, 'Veuillez sélectionner une couleur !')
             document.querySelector("label[for='color-select']").style.color = "red"
         }
         
