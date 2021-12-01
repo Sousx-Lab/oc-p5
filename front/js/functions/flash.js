@@ -2,16 +2,35 @@
  * display a flash message 
  */
 export const Flash = {
-    success(statusCode = 0, message = ''){
+    /**
+     * @param {number|null} statusCode 
+     * @param {string} message 
+     */
+    success(statusCode = null, message){
         buildflashDOM(statusCode, message, "success")
     },
-    error(statusCode = 0, message = ''){
+
+    /**
+     * @param {number|null} statusCode 
+     * @param {string} message 
+     */
+    error(statusCode = null, message){
         buildflashDOM(statusCode, message, "danger")
     },
-    info(statusCode = 0, message = ''){
+
+    /**
+     * @param {number|null} statusCode 
+     * @param {string} message 
+     */
+    info(statusCode = null, message){
         buildflashDOM(statusCode, message, "info")
     },
-    warning(statusCode = 0, message = ''){
+
+    /**
+     * @param {number|null} statusCode 
+     * @param {string} message 
+     */
+    warning(statusCode = null, message){
         buildflashDOM(statusCode, message, "warning")
     }
 }
@@ -20,7 +39,7 @@ export const Flash = {
  * @param {string} message 
  * @param {string} errorType 
  */
-function buildflashDOM(statusCode = 0, message = '', errorType = '') {
+function buildflashDOM(statusCode = null, message, errorType = '') {
     
     const body = document.body
     let flashContainer = document.getElementById("flash-container");
@@ -29,20 +48,72 @@ function buildflashDOM(statusCode = 0, message = '', errorType = '') {
         if(!flashContainer){
             let container = `<div id="flash-container"></div>`
             style.insertRule(
-            '#flash-container {position:fixed; right:5px; top:5px; width:300px; height:auto; background:transparent;}',0)
+            `#flash-container{ 
+                position:fixed; 
+                right:5px; 
+                top:5px; 
+                width:300px; 
+                height:auto; 
+                background:transparent;
+                }`
+            )
             body.insertAdjacentHTML('afterbegin', container)
             flashContainer = document.getElementById("flash-container");
         }
         let messageId = flashContainer.children.length;
        
-        let flashMessage = `<div id="${"message--"+messageId}" class="flash-message--${errorType}">${message} ${statusCode !== 0 ? statusCode : ''}</div>`
+        let flashMessage = `<div id="${"message--"+messageId}" class="flash-message--${errorType}">${message} ${statusCode ? statusCode : ''}</div>`
         let progressBar = `<span id="${"progress-bar--"+messageId}" class="flash-progress-bar"></span>`
+        
         style.insertRule(
-            `.flash-message--${errorType} {position: relative; color: #FFFFFF;font-size:12px; max-width: 100%; height: auto; margin-bottom: 5px; padding:20px; border-radius:8px; background: ${getColorErrorType(errorType)};}`
+        `.flash-message--removed{
+            transform: translateX(100%);
+            }`
         )
-        style.insertRule(`.flash-message--${errorType}:before {content: "X"; cursor:pointer; font-size:15px; font-weight:500; position:absolute; top:5px; right:10px;}`
+        
+        /**Insert CSS rules for Flah message div */
+        style.insertRule(
+        `.flash-message--${errorType}{
+            position: relative; 
+            color: #FFFFFF;
+            font-size:12px; 
+            max-width: 100%; 
+            height: 15px; 
+            margin-bottom: 5px; 
+            padding:20px; 
+            border-radius:8px; 
+            background: ${getColorErrorType(errorType)};
+            transition: all 500ms 0s;
+            overflow-y: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            }`
         )
-        style.insertRule(`.flash-progress-bar {content: ""; position:absolute; left:0%; right:7px; bottom:0; padding:1.5px 0;border-radius: 23px; background:#757575 }`
+
+        /** Insert CSS rules for close button*/
+        style.insertRule(
+        `.flash-message--${errorType}:before{
+            content: "X"; 
+            cursor:pointer; 
+            font-size:15px; 
+            font-weight:500; 
+            position:absolute; 
+            top:5px; right:10px;
+            }`
+        )
+
+        /**Insert CSS rules for ProgressBar span */
+        style.insertRule(
+        `.flash-progress-bar{ 
+            content: ""; 
+            position:absolute; 
+            left:0%; 
+            right:7px; 
+            bottom:0; 
+            padding:1.5px 0;
+            border-radius: 23px; 
+            background:#757575; 
+            }`
         )
         
         flashContainer.insertAdjacentHTML('afterbegin', flashMessage)
@@ -111,16 +182,20 @@ function handleProgressBar(container, elem, timer = 30){
     let interval = setInterval(frame, timer)
     
     function frame(){
-        if(left >= 100 ){
-            clearInterval(interval)
-            left = 100;
-            elem.parentElement.remove()
+        if(left === 90 ){
+            elem.parentElement.classList.add("flash-message--removed");
+        }
+        if(left >= 100){
+                clearInterval(interval)
+                left = 100;
+                elem.parentElement.remove()
+            
             if(container.children.length === 0){
                 container.remove()
             }
         }else{
             left++;
-            elem.style.left = `${ left+"%"}`;    
+            elem.style.left = `${left+"%"}`;    
         }
         
     }
