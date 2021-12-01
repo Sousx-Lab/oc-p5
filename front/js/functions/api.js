@@ -1,8 +1,7 @@
-const HTTP_UNPROCESSABLE_ENTITY = 422
-const HTTP_NOT_FOUND = 404
-const HTTP_FORBIDDEN = 403
-const HTTP_OK = 200
+import {Flash} from './flash.js'
+
 const HTTP_NO_CONTENT = 204
+const HTTP_OK = 200
 
 /**
  * @param {RequestInfo} url
@@ -33,7 +32,7 @@ async function jsonFetch (url, params = {}) {
       return null
   }
   const data = await response.json()
-  if (response.status === HTTP_OK) {
+  if (response.status === HTTP_OK) { 
     return data
   }
 
@@ -51,9 +50,9 @@ async function jsonFetch (url, params = {}) {
     return await jsonFetch(url, params)
   } catch (e) {
     if (e instanceof ApiError) {
-      flash(e.name, 'danger', 4)
+      Flash.error(e.statuCode, e.message)
     } else {
-      flash(e, 'danger', 4)
+      Flash.error(e)
     }
     return null
   }
@@ -61,13 +60,28 @@ async function jsonFetch (url, params = {}) {
 
 
 class ApiError {
+  /**
+   * @param {?number} statusCode 
+   * @param {?string} statusText 
+   */
   constructor(statusCode, statusText){
     this.statusCode = statusCode
     this.statusText = statusText
   }
 
+  getMessage(){
+    return this.statusText
+  }
   get message(){
-    console.log(this.statusCode, this.statusText)
+    return this.getMessage()
+  }
+
+  getStatusCode(){
+    return this.statusCode
+  }
+
+  get statuCode(){
+    return this.getStatusCode()
   }
 
 }
