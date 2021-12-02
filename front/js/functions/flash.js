@@ -84,7 +84,7 @@ function buildflashDOM(statusCode = null, message, errorType = '') {
             border-radius:8px; 
             background: ${getColorErrorType(errorType)};
             transition: all 500ms 0s;
-            overflow-y: hidden;
+            overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
             }`
