@@ -1,10 +1,9 @@
+
 /**
- * 
- * @param {object} product 
- * @return {String}
+ * @param {Product} product 
+ * @return {string}
  */
 export const Card = (product = {}) => {
-
     return `<a href="${product.url}">
         <article>
             <img src="${product.imageUrl}" alt="${product.altTxt} ">

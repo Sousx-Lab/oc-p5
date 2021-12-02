@@ -2,7 +2,7 @@ import { jsonFetchOrFlash } from "../functions/api.js";
 import { API } from "../conf.js";
 import { Product } from '../entity/product.js'
 import { Flash } from "../functions/flash.js";
-import { Cart, CartItem } from "../entity/cart.js";
+import { Cart, CartItem } from "../functions/cart.js";
 /**
  * define type of targetElems
  * @typedef {object} targetElems
@@ -32,7 +32,7 @@ export const ProductDetails = () => {
 
             /**@type {targetElems} */
             const awaitSubmit = insertProduct(Product)
-            handleSubmit(Product._id, awaitSubmit)
+            handleSubmit(Product, awaitSubmit)
         })
 
 }
@@ -80,24 +80,25 @@ function insertProduct(product) {
 
 /**
  * @param {targetElems} target
- * @param {string} id
+ * @param {Product} product
  */
-function handleSubmit(id, target) {
-
+function handleSubmit(product, target) {
+    
     target.submitButton.addEventListener('click', function (e) {
         e.preventDefault();
         let selectedColorValue = target.selectedColor.options[target.selectedColor.selectedIndex].value
         let quantity = parseInt(target.quantity.value, 10)
-
-        if (selectedColorValue) {
+        
+        if (product.colors.find(color => color === selectedColorValue)) {
             if (quantity <= 0 || quantity > 100) {
-                target.quantity.value = 1
+                target.quantity.value = "1"
+                quantity = 1
             }
             /**@type {CartItem} */
-            let item =  CartItem
-            item.id = id, 
+            let item = CartItem
+            item.id = product._id,
             item.color = selectedColorValue, 
-            item.quantities = parseInt(target.quantity.value, 10)
+            item.quantities = quantity
 
             Cart.addItem(item)
             Flash.success(null, 'Le produit a bien été ajouté au panier')

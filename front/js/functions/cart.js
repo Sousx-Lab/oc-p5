@@ -1,9 +1,9 @@
-import {Storage} from '../functions/localStorage.js'
+import {Storage} from './localStorage.js'
 
 export const Cart = {
     /**@param {CartItem} obj */
     addItem(obj) {
-        let currentItems = this.getAll('cart')
+        let currentItems = this.getItems('cart')
         if (currentItems instanceof Array) {
             currentItems.forEach(e =>{
                 
@@ -28,12 +28,25 @@ export const Cart = {
         }
         Storage.set('cart', [obj])
     },
+
     /**
      *@param {string} key 
-     *@returns {array | null}
+     *@returns {array[CartItem]| null} Array[CatItem]
     */
-    getAll(key) {
+    getItems(key) {
         return Storage.get(key)
+    },
+
+    /**
+     * @param {[CartItem]} items 
+     * @returns {number} 
+    */
+    getQuantitiesItems(items){
+        let quantities = 0;
+        items.map(e => {
+            quantities += e.quantities
+        })
+        return quantities
     }
 }
 
