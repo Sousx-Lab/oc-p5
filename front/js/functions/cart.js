@@ -1,11 +1,14 @@
 import {Storage} from './localStorage.js'
 
 export const Cart = {
-    /**@param {CartItem} obj */
-    addItem(obj) {
-        let currentItems = this.getItems('cart')
+    /**
+     * @param {CartItem} obj 
+     * @param {string | null} key
+    */
+    addItem(key = 'cart', obj) {
+        let currentItems = this.getItems(key)
         if (currentItems instanceof Array) {
-            currentItems.forEach(e =>{
+            currentItems.map(e =>{
                 
                 if (e.id === obj.id && e.color !== obj.color && 
                     currentItems.find(({ color }) => color === obj.color) === undefined) {                
@@ -23,17 +26,17 @@ export const Cart = {
                 
             })
            
-            Storage.set('cart', currentItems)
+            Storage.set(key, currentItems)
             return
         }
-        Storage.set('cart', [obj])
+        Storage.set(key, [obj])
     },
 
     /**
      *@param {string} key 
-     *@returns {array[CartItem]| null} Array[CatItem]
+     *@returns {array|null} Array[CatItem]
     */
-    getItems(key) {
+    getItems(key = 'cart') {
         return Storage.get(key)
     },
 
@@ -42,11 +45,24 @@ export const Cart = {
      * @returns {number} 
     */
     getQuantitiesItems(items){
-        let quantities = 0;
-        items.map(e => {
-            quantities += e.quantities
-        })
-        return quantities
+        let quantities = 0
+        if(items instanceof Array && items.length > 0){
+            let quantities = 0;
+                items.map(e => {
+                quantities += e.quantities
+            })
+            return quantities
+        }
+        
+    },
+    
+    /**
+     * 
+     * @param {string} key 
+     * @param {string} id 
+     */
+    deleteItemById(key = 'cart', id){
+        let currentItems = this.getItems(key)
     }
 }
 

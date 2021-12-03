@@ -28,10 +28,12 @@ export const ProductDetails = () => {
             method: 'GET'
         })
         .then(function (data) {
-            Object.assign(Product, data)
-
+            if(Object.keys(data).length === 0){
+                return;
+            }
+        
             /**@type {targetElems} */
-            const awaitSubmit = insertProduct(Product)
+            const awaitSubmit = insertProduct(Object.assign(Product, data))
             handleSubmit(Product, awaitSubmit)
         })
 

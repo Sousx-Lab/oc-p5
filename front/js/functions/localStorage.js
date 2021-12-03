@@ -20,7 +20,7 @@ export const Storage = {
     /**
      * @param {string} key
      * @returns {void}
-     */
+    */
     delete(key){
         window.localStorage.removeItem(key)
     }
