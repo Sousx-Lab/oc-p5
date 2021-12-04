@@ -86,16 +86,18 @@ function insertProduct(product) {
  */
 function handleSubmit(product, target) {
     
+    target.quantity.value = "1"
+
     target.submitButton.addEventListener('click', function (e) {
         e.preventDefault();
         let selectedColorValue = target.selectedColor.options[target.selectedColor.selectedIndex].value
         let quantity = parseInt(target.quantity.value, 10)
-        
+
         if (product.colors.find(color => color === selectedColorValue)) {
             if (quantity <= 0 || quantity > 100) {
-                target.quantity.value = "1"
-                quantity = 1
+                quantity = parseInt(target.quantity.value = "1", 10)
             }
+            
             /**@type {CartItem} */
             let item = CartItem
             item.id = product._id,
