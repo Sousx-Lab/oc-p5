@@ -64,7 +64,7 @@ function insertProduct(product) {
 
     /** Insert product colors */
     const selectColor = document.getElementById('colors')
-    Product.colors.forEach((color) => {
+    Product.colors.map((color) => {
         let option = document.createElement("option");
         option.value = color
         option.text = color

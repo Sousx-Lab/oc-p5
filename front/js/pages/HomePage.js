@@ -12,7 +12,7 @@ export const ProductsCard = (parentElement) => {
         if(Object.keys(data).length === 0){
             return;
         }
-        data.forEach((p) =>{
+        data.map((p) =>{
             parentElement.insertAdjacentHTML('beforeend', Card(Object.assign(Product, p)))
         })
     })

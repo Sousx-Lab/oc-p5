@@ -8,7 +8,7 @@ export const Cart = {
     addItem(obj) {
         let currentItems = this.getItems('cart')
         if (currentItems instanceof Array) {
-            currentItems.map(e =>{
+            currentItems.forEach(e =>{
                 
                 if (e.id === obj.id && e.color !== obj.color && 
                     currentItems.find(({ color }) => color === obj.color) === undefined) {                
@@ -45,9 +45,8 @@ export const Cart = {
      * @returns {number} 
     */
     getQuantitiesItems(items){
-        let quantities = 0
+        let quantities = 0;
         if(items instanceof Array && items.length > 0){
-            let quantities = 0;
                 items.map(e => {
                 quantities += e.quantities
             })
