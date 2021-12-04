@@ -5,8 +5,8 @@ export const Cart = {
      * @param {CartItem} obj 
      * @param {string | null} key
     */
-    addItem(key = 'cart', obj) {
-        let currentItems = this.getItems(key)
+    addItem(obj) {
+        let currentItems = this.getItems('cart')
         if (currentItems instanceof Array) {
             currentItems.map(e =>{
                 
@@ -26,10 +26,10 @@ export const Cart = {
                 
             })
            
-            Storage.set(key, currentItems)
+            Storage.set('cart', currentItems)
             return
         }
-        Storage.set(key, [obj])
+        Storage.set('cart', [obj])
     },
 
     /**
