@@ -42,11 +42,11 @@ export const Flash = {
 function buildflashDOM(statusCode = null, message, errorType = '') {
     
     const body = document.body
-    let flashContainer = document.getElementById("flash-container");
+    let container = document.getElementById("flash-container");
     let style = getStyleRules("style")
 
-        if(!flashContainer){
-            let container = `<div id="flash-container"></div>`
+        if(null === container){
+            container = `<div id="flash-container"></div>`
             style.insertRule(
             `#flash-container{ 
                 position:fixed; 
@@ -58,35 +58,33 @@ function buildflashDOM(statusCode = null, message, errorType = '') {
                 }`
             )
             body.insertAdjacentHTML('afterbegin', container)
-            flashContainer = document.getElementById("flash-container");
+            container = document.getElementById("flash-container");
         }
-        let messageId = flashContainer.children.length;
-       
-        let flashMessage = `<div id="${"message--"+messageId}" class="flash-message--${errorType}">${message} ${statusCode ? statusCode : ''}</div>`
-        let progressBar = `<span id="${"progress-bar--"+messageId}" class="flash-progress-bar"></span>`
+        let messageId = container.children.length;
         
-        style.insertRule(
-        `.flash-message--removed{
-            transform: translateX(100%);
-            }`
-        )
+        /**delete css rules if exist */
+        deleteStyleRules(style, errorType, messageId)
+
+        let flashMessage = `<div id="${"message--"+messageId}" class="flash-message--${errorType}">${message} ${statusCode ? statusCode : ''}</div>`
+        let progressBar = `<span id="${"progress-bar--"+messageId}" class="flash-progressBar--${errorType}"></span>`
         
         /**Insert CSS rules for Flah message div */
         style.insertRule(
         `.flash-message--${errorType}{
             position: relative; 
-            color: #FFFFFF;
+            color: #000000;
             font-size:12px; 
-            max-width: 100%; 
+            max-width: 100%;
             height: 15px; 
-            margin-bottom: 5px; 
-            padding:20px; 
-            border-radius:8px; 
-            background: ${getColorErrorType(errorType)};
-            transition: all 500ms 0s;
+            margin-bottom: 5px;
+            padding: 20px 25px;
+            border-radius: 8px 4px 4px 8px; 
+            background: #FFFFFF;
+            box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            transition: all 500ms 0s;
             }`
         )
 
@@ -98,36 +96,49 @@ function buildflashDOM(statusCode = null, message, errorType = '') {
             font-size:15px; 
             font-weight:500; 
             position:absolute; 
-            top:5px; right:10px;
+            top:5px; 
+            right:10px;
+            }`
+        )
+        style.insertRule(
+        `.flash-message--${errorType}:after{
+            content: ""; 
+            width: 12px;
+            position:absolute; 
+            left:0;
+            border: 1px solid ${getColorByErrorType(errorType)};
+            top:0;
+            bottom:0;
+            background: ${getColorByErrorType(errorType)};
             }`
         )
 
         /**Insert CSS rules for ProgressBar span */
         style.insertRule(
-        `.flash-progress-bar{ 
+        `.flash-progressBar--${errorType}{ 
             content: ""; 
             position:absolute; 
-            left:0%; 
-            right:7px; 
+            left:0; 
+            right:0; 
             bottom:0; 
             padding:1.5px 0;
             border-radius: 23px; 
-            background:#757575; 
+            background: ${getColorByErrorType(errorType)};
             }`
         )
         
-        flashContainer.insertAdjacentHTML('afterbegin', flashMessage)
+        container.insertAdjacentHTML('afterbegin', flashMessage)
         let flashedMessage = document.getElementById(`${"message--"+messageId}`)
         
         if(flashedMessage){
             flashedMessage.insertAdjacentHTML('beforeend', progressBar)
             let progBar = document.getElementById(`${"progress-bar--"+messageId}`)
-            handleProgressBar(flashContainer, progBar, 50)
+            handleProgressBar(container, progBar, 50)
             
             flashedMessage.addEventListener('click', function(e){
                 e.target.remove()
-                if(flashContainer.children.length === 0){
-                    flashContainer.remove()
+                if(container.children.length === 0){
+                    container.remove()
                 }
                 e.target.removeEventListener('click', ()=>{})
             })
@@ -140,7 +151,7 @@ function buildflashDOM(statusCode = null, message, errorType = '') {
  * @param {number} alpha transparency 0 to 1
  * @returns {string} RGBA color
  */
-function getColorErrorType(errorType, alpha = 1){
+function getColorByErrorType(errorType, alpha = 1){
 
     let color = `rgba(124, 188, 232, ${alpha})`;
     if(errorType === "danger"){
@@ -171,6 +182,41 @@ function getStyleRules(cssFileName) {
 }
 
 /**
+ * 
+ * @param {CSSStyleSheet} style 
+ * @param {string} errorType 
+ * @param {number} messageId
+ * @returns {void}
+ */
+function deleteStyleRules(style, errorType, messageId){
+    if(style.cssRules) {
+        for (let i=0; i< style.cssRules.length; i++) {
+            
+            if (style.cssRules[i].selectorText === `.flash-message--${errorType}`){
+                style.deleteRule(i);
+            }
+            if(style.cssRules[i].selectorText === `.flash-progressBar--${errorType}`){
+                style.deleteRule(i);
+            }
+            
+            if(style.cssRules[i].selectorText === `#progress-bar--${messageId}`){
+                style.deleteRule(i);
+            }
+            
+            if(style.cssRules[i].selectorText === `.flash-message--${errorType}::before`){
+                style.deleteRule(i);
+            }
+            
+            if(style.cssRules[i].selectorText === `.flash-message--${errorType}::after`) {
+                style.deleteRule(i);
+            }
+            console.log(style.cssRules[i].selectorText)
+        }
+    }
+    
+}
+
+/**
  * handle progressbar
  * @param {HTMLElement} container
  * @param {HTMLElement} elem 
@@ -179,17 +225,25 @@ function getStyleRules(cssFileName) {
  */
 function handleProgressBar(container, elem, timer = 30){
     let left = 0;
+    let right = -100
+    elem.parentElement.style.right = `${right+"%"}`;
+
     let interval = setInterval(frame, timer)
-    
     function frame(){
+        if(right < 0){
+            right += 25
+            elem.parentElement.style.right = `${right+"%"}`;
+            return
+        }
+
         if(left === 90 ){
-            elem.parentElement.classList.add("flash-message--removed");
+            elem.parentElement.style.transform = "translateX(100%)"
         }
         if(left >= 100){
                 clearInterval(interval)
                 left = 100;
                 elem.parentElement.remove()
-            
+
             if(container.children.length === 0){
                 container.remove()
             }
