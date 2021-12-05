@@ -112,7 +112,6 @@ function handleSubmit(product, target) {
             document.querySelector("label[for='color-select']").style.color = "red"
         }
         
-        
     })
 
 }
