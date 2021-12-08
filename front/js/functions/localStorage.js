@@ -4,8 +4,8 @@ export const Storage = {
      * @returns {array | null}
     */
     get(key){
-        let itmes = JSON.parse(window.localStorage.getItem(key))
-        return itmes;
+        let items = JSON.parse(window.localStorage.getItem(key))
+        return items;
     },
 
     /**
