@@ -210,7 +210,6 @@ function deleteStyleRules(style, errorType, messageId){
             if(style.cssRules[i].selectorText === `.flash-message--${errorType}::after`) {
                 style.deleteRule(i);
             }
-            console.log(style.cssRules[i].selectorText)
         }
     }
     
