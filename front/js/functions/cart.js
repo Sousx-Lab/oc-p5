@@ -1,5 +1,6 @@
+import { jsonFetchOrFlash } from './api.js'
 import {Storage} from './localStorage.js'
-
+import { API } from "../conf.js";
 export const Cart = {
     /**
      * @param {CartItem} obj 
@@ -7,7 +8,7 @@ export const Cart = {
     */
     addItem(obj) {
         let currentItems = this.getItems('cart')
-        if (currentItems instanceof Array) {
+        if (currentItems instanceof Array ) {
             currentItems.forEach(e =>{
                 
                 if (e.id === obj.id && e.color !== obj.color && 
@@ -33,7 +34,29 @@ export const Cart = {
     },
 
     /**
-     *@param {string} key 
+     * @param {string} id
+     * @param {string} color
+     */
+    deleteItem(id, color){
+        let currentItems = this.getItems('cart')
+        if(currentItems instanceof Array && currentItems.length > 0){
+            let itemIndex = currentItems.findIndex(item => item.id === id && item.color === color)
+            if( itemIndex >= 0){
+                let deltedItem = currentItems[itemIndex]
+                currentItems.splice(itemIndex, 1)
+                if(currentItems.length === 0){
+                    Storage.delete('cart');
+                    return deltedItem
+                }
+                Storage.set('cart', currentItems)
+                return deltedItem
+            };
+        }
+        return null
+    },
+
+    /**
+     *@param {string|null} key 
      *@returns {array|null} Array[CatItem]
     */
     getItems(key = 'cart') {
@@ -41,28 +64,66 @@ export const Cart = {
     },
 
     /**
-     * @param {[CartItem]} items 
+     * Calculate total of quantity items
      * @returns {number} 
     */
-    getQuantitiesItems(items){
+    getTotalItemsQuantity(){
+        let currentItems = this.getItems('cart') 
         let quantities = 0;
-        if(items instanceof Array && items.length > 0){
-                items.map(e => {
+        if(currentItems instanceof Array && currentItems.length > 0){
+                currentItems.map(e => {
                 quantities += e.quantities
             })
             return quantities
         }
-        
+        return quantities
     },
-    
+
     /**
      * 
-     * @param {string} key 
      * @param {string} id 
+     * @param {string} color 
+     * @param {number} quantity
+     * @param {number} totalPrice
      */
-    deleteItemById(key = 'cart', id){
-        let currentItems = this.getItems(key)
-    }
+    updateItemQuantity(id, color, quantity, totalPrice, price){
+        let currentItems = this.getItems('cart')
+        if(currentItems instanceof Array && currentItems.length > 0){
+            let itemIndex = currentItems.findIndex(item => item.id === id && item.color === color)
+            if(itemIndex < 0){
+                return
+            }
+            //calculate old product price
+            let oldTotalPrice = price * currentItems[itemIndex].quantities
+            //subtract the old price from the total price
+            totalPrice -= oldTotalPrice
+
+            //updating quantity
+            currentItems[itemIndex].quantities = quantity
+
+            //add the new price to the total price
+            totalPrice += price * quantity
+        
+            if(currentItems[itemIndex].quantities <= 0){
+                currentItems.splice(itemIndex, 1)
+            }
+            console.log(totalPrice)
+            Storage.set('cart', currentItems)
+            return totalPrice
+        }
+    },
+
+    // async getItemPrice(id){
+    //     return await jsonFetchOrFlash(API.PRODUCT(id))
+    //     .then(product => {
+    //         if(Object.keys(product).length === 0){
+    //             console.log(product)
+    //             return
+    //         }
+    //         return product.price
+    //     })
+        
+    // }
 }
 
 /**
@@ -71,6 +132,7 @@ export const Cart = {
  * @property {string} quantities
  * @property {string} color
  */
+
 
 /**
  * @type {CartItem} CartItem

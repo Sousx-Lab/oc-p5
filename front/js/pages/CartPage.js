@@ -2,63 +2,128 @@ import { Cart, CartItem } from "../functions/cart.js"
 import { jsonFetchOrFlash } from "../functions/api.js"
 import { API } from "../conf.js";
 import { Product } from "../entity/product.js";
+import { Flash } from "../functions/flash.js";
 
+
+let totalPrice = 0
+let productPrice = []
 /**
  * @param {HTMLElement} containerCartItems
  */
 export const CartPage = (containerCartItems) => {
 
-     /**@type {array} */
-    const cart = Cart.getItems('cart')
-    
-    fetchCartItems(cart, containerCartItems)
-        .then((deleteItems) => {
-        deleteItems.forEach(item => {
-            item.addEventListener('click', function(el){
-                let article = el.target.closest('article')
-                //* gerer la supprission de l'item dans le localStorage
-                console.log(article.dataset.id)
-            })
+    /**@type {array} */
+    const cartItems = Cart.getItems()
+    if (null === cartItems) {
+        document.querySelector('h1').innerText += " est vide"
+        return
+    }
+    fetchCartItems(cartItems, containerCartItems)
+        .then(() => {
+            handleDeleteItem()
+            handleQuantityItem()
         })
-    })
-   
+
 }
 
 /**
+ * Await fetching each product from Api and append it to DOM
  * @param {[CartItem]} cart 
  * @param {HTMLElement} containerCartItems 
- * @returns {NodeList | null}
+ * @returns {Promise}
  */
-async function fetchCartItems(cart, containerCartItems){
+async function fetchCartItems(cart, containerCartItems) {
 
-    let totalPrice = 0
-    
-    return await Promise.all(cart.map(async(item) => {
-        
-        await jsonFetchOrFlash(API.PRODUCT(item.id), {method: 'GET'})
-        .then((product) =>{
-            if(Object.keys(product).length === 0){
-                return
-            }
+    return await Promise.all(cart.map(async (item) => {
 
-                totalPrice += product.price * item.quantities 
-                containerCartItems.insertAdjacentHTML('beforeend', CartArticle(product, item))
+         await jsonFetchOrFlash(API.PRODUCT(item.id), {
+                method: 'GET'
+                })
+                .then((product) => {
+                    if (Object.keys(product).length === 0) {
+                        return
+                    }
+                    totalPrice += product.price * item.quantities
+                    if(!productPrice.find(e => e.id === item.id && e.color === item.color)){
+                        productPrice = [...productPrice, {id: item.id, color: item.color, price: product.price}]
+                    }
+                    containerCartItems.insertAdjacentHTML('beforeend', CartArticle(product, item))
 
-                document.getElementById('totalQuantity').innerText = Cart.getQuantitiesItems(cart)
-                document.getElementById('totalPrice').innerText = totalPrice
-                
-            })
+                    document.getElementById('totalQuantity').innerText = Cart.getTotalItemsQuantity()
+                    document.getElementById('totalPrice').innerText = totalPrice
+
+                })
         }
-        
-    )).then(() => {
-        return document.querySelectorAll('.deleteItem') ?
-        document.querySelectorAll('.deleteItem') : null
+
+    ))
+}
+
+/**
+ * Delete item to cart and update total item & total price
+ * @returns {void}
+ */
+function handleDeleteItem() {
+    let deleteButtons = document.querySelectorAll('.deleteItem')
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function (el) {
+            let article = el.target.closest('article')
+            let deletedItem =  Cart.deleteItem(article.dataset.id, article.dataset.color)
+            if (deletedItem) {
+                let price =  productPrice.find(e => e.id === article.dataset.id && e.color === article.dataset.color)
+                if(!price){
+                    return
+                }
+                totalPrice -= price.price * deletedItem.quantities
+                article.remove()
+                let productIndex = productPrice.findIndex(e => e.id === article.dataset.id && e.color === article.dataset.color)
+                productPrice.splice(productIndex,1)
+                document.getElementById('totalQuantity').innerText = Cart.getTotalItemsQuantity()
+                document.getElementById('totalPrice').innerText = totalPrice = totalPrice
+                return;
+            }
+            Flash.error(null, "Le produit que vous essayez de supprimer n'existe pas!")
+            return
+        })
     })
+}
+
+/**
+ * Handle item quantity and update total price & quantity
+ * @returns {void}
+ */
+function handleQuantityItem(){
+
+    let quantityInput = document.getElementsByName('itemQuantity')
+        quantityInput.forEach(input => {
+            input.addEventListener('change', function(el){
+                let quantity = parseInt(el.target.value,10)
+                    if(quantity instanceof Number && quantity <= 0){
+                        Flash.info(null, "Quantité insuffisante!")
+                        return
+                    }
+                    let article = el.target.closest('article')
+                    let price = productPrice.find(e => e.id === article.dataset.id && e.color === article.dataset.color)
+
+                    totalPrice = Cart.updateItemQuantity(
+                        article.dataset.id, 
+                        article.dataset.color, 
+                        quantity, 
+                        totalPrice, 
+                        price.price
+                    )
+                    document.getElementById('totalPrice').innerText = totalPrice
+                    
+                    document.getElementById('totalQuantity').innerText = Cart.getTotalItemsQuantity()
+                    
+                    
+            })
+        })
 }
 
 /**
  * @param {Product} product
  * @param {CartItem} cart
+ * @returns {string}
  */
 const CartArticle = (product, cart) => {
 
@@ -84,7 +149,3 @@ const CartArticle = (product, cart) => {
       </div>
     </article>`
 }
-// console.log(document.querySelector(`[data-id="${item.id}"]`))
-// [deleteItems].forEach(e => {console.log("lol")})
-// document.querySelectorAll("[data-foo]")
-// document.querySelectorAll("[data-foo]")
