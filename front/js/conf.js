@@ -12,6 +12,10 @@ export const API = {
      */
     PRODUCT(id){
         return this.BASE_URL + "/products" +'/'+  id
+    },
+
+    get ORDER(){
+        return this.BASE_URL + "/order"
     }
 }
 
