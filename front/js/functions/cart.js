@@ -107,7 +107,6 @@ export const Cart = {
             if(currentItems[itemIndex].quantities <= 0){
                 currentItems.splice(itemIndex, 1)
             }
-            console.log(totalPrice)
             Storage.set('cart', currentItems)
             return totalPrice
         }
