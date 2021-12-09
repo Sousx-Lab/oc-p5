@@ -3,10 +3,11 @@ import { jsonFetchOrFlash } from "../functions/api.js"
 import { API } from "../conf.js";
 import { Product } from "../entity/product.js";
 import { Flash } from "../functions/flash.js";
+import { Validator } from "../functions/validator.js";
 
 
 let totalPrice = 0
-let productPrice = []
+let fetchedProduct = []
 /**
  * @param {HTMLElement} containerCartItems
  */
@@ -22,6 +23,7 @@ export const CartPage = (containerCartItems) => {
         .then(() => {
             handleDeleteItem()
             handleQuantityItem()
+            handleSubmit()
         })
 
 }
@@ -34,28 +36,35 @@ export const CartPage = (containerCartItems) => {
  */
 async function fetchCartItems(cart, containerCartItems) {
 
-    return await Promise.all(cart.map(async (item) => {
-
-         await jsonFetchOrFlash(API.PRODUCT(item.id), {
-                method: 'GET'
-                })
-                .then((product) => {
-                    if (Object.keys(product).length === 0) {
-                        return
-                    }
-                    totalPrice += product.price * item.quantities
-                    if(!productPrice.find(e => e.id === item.id && e.color === item.color)){
-                        productPrice = [...productPrice, {id: item.id, color: item.color, price: product.price}]
-                    }
-                    containerCartItems.insertAdjacentHTML('beforeend', CartArticle(product, item))
-
-                    document.getElementById('totalQuantity').innerText = Cart.getTotalItemsQuantity()
-                    document.getElementById('totalPrice').innerText = totalPrice
-
-                })
-        }
-
-    ))
+    try {
+        await Promise.all(cart.map(async (item) => {
+       
+            await jsonFetchOrFlash(API.PRODUCT(item.id), {
+                    method: 'GET'
+                    })
+                    .then((product) => {
+                        if (Object.keys(product).length === 0) {
+                            return
+                        }
+                        totalPrice += product.price * item.quantities
+                        if(!fetchedProduct.find(e => e.id === item.id && e.color === item.color)){
+                            fetchedProduct = [...fetchedProduct, {id: item.id, color: item.color, price: product.price}]
+                        }
+                        /** Insert product in DOM */
+                        containerCartItems.insertAdjacentHTML('beforeend', CartArticle(product, item))
+                        /** Insert Total item quantity */
+                        document.getElementById('totalQuantity').innerText = Cart.getTotalItemsQuantity()
+                        /** Insert Total price */
+                        document.getElementById('totalPrice').innerText = totalPrice
+    
+                    })
+            }
+    
+        ))
+    } catch (error) {
+        Flash.error(null, "Une erreur s'est produite lors du la récupération des produits")
+    }
+   
 }
 
 /**
@@ -67,16 +76,23 @@ function handleDeleteItem() {
     deleteButtons.forEach(button => {
         button.addEventListener('click', function (el) {
             let article = el.target.closest('article')
+
+            /** deleted product from cart */
             let deletedItem =  Cart.deleteItem(article.dataset.id, article.dataset.color)
+            
             if (deletedItem) {
-                let price =  productPrice.find(e => e.id === article.dataset.id && e.color === article.dataset.color)
+                /** find product price */
+                let price = fetchedProduct.find(e => e.id === article.dataset.id && e.color === article.dataset.color)
                 if(!price){
                     return
                 }
+                /** update total price */
                 totalPrice -= price.price * deletedItem.quantities
                 article.remove()
-                let productIndex = productPrice.findIndex(e => e.id === article.dataset.id && e.color === article.dataset.color)
-                productPrice.splice(productIndex,1)
+                /** find & update fetchedProduct array */
+                let productIndex = fetchedProduct.findIndex(e => e.id === article.dataset.id && e.color === article.dataset.color)
+                fetchedProduct.splice(productIndex,1)
+                /** update total price & total quantity */
                 document.getElementById('totalQuantity').innerText = Cart.getTotalItemsQuantity()
                 document.getElementById('totalPrice').innerText = totalPrice = totalPrice
                 return;
@@ -102,7 +118,7 @@ function handleQuantityItem(){
                         return
                     }
                     let article = el.target.closest('article')
-                    let price = productPrice.find(e => e.id === article.dataset.id && e.color === article.dataset.color)
+                    let price = fetchedProduct.find(e => e.id === article.dataset.id && e.color === article.dataset.color)
 
                     totalPrice = Cart.updateItemQuantity(
                         article.dataset.id, 
@@ -119,8 +135,79 @@ function handleQuantityItem(){
             })
         })
 }
+/**
+ * Handle submit form order
+ */
+function handleSubmit(){
+    let form = document.querySelector('form')
+        form.addEventListener('submit', function(e){
+            e.preventDefault()
+            let formData = new FormData(form)
+            let formObj = {};
+            for (let pair of formData.entries()) {
+                formObj[pair[0]] = pair[1]
+            }
+            if(!validateForm(formObj)){
+                return false
+            }
+            
+            console.log('submited')
+        })
+}
 
 /**
+ * 
+ * @param {object} formObj
+ * @returns {boolean}
+ */
+function validateForm(formObj){
+    let validate = true
+
+    if(false === Validator.lettres(formObj.firstName)){
+        document.getElementById('firstNameErrorMsg').innerText =
+        `Le Prénom ${formObj.firstName} n'est pas valide !`;
+        validate = false
+    }else{
+        document.getElementById('firstNameErrorMsg').innerText = ''
+    }
+
+    if(false === Validator.lettres(formObj.lastName)){
+        document.getElementById('lastNameErrorMsg').innerText = 
+        `Le Nom ${formObj.lastName} n'est pas valide !`
+        validate = false
+    }else{
+        document.getElementById('lastNameErrorMsg').innerText = ''
+    }
+
+    if(false === Validator.notBlank(formObj.address)){
+        document.getElementById('addressErrorMsg').innerText = 
+        `L'adresse ne doit pas étre vide !`
+        validate = false
+    }else{
+        document.getElementById('addressErrorMsg').innerText = ''
+    }
+
+    if(false === Validator.notBlank(formObj.city)){
+        document.getElementById('cityErrorMsg').innerText = 
+        `La ville ne doit pas étre vide !`
+        validate= false
+    }else{
+        document.getElementById('cityErrorMsg').innerText = ''
+    }
+
+    if(false === Validator.email(formObj.email)){
+        document.getElementById('emailErrorMsg').innerText = 
+        `L'adresse email ${formObj.email} n'est pas valide !`;
+        validate = false
+    }else{
+        document.getElementById('emailErrorMsg').innerText = ''
+    }
+    
+    return validate
+}
+
+/**
+ * HTML article elements with props
  * @param {Product} product
  * @param {CartItem} cart
  * @returns {string}
