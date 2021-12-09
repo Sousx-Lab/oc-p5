@@ -4,6 +4,7 @@ const HTTP_NO_CONTENT = 204
 const HTTP_OK = 200
 
 /**
+ * fatch url and return Json
  * @param {RequestInfo} url
  * @param {object} params
  * @returns {Promise<object>}
@@ -40,6 +41,7 @@ async function jsonFetch (url, params = {}) {
 }
 
 /**
+ * Call jsonFetch function & handle error 
  * @param {RequestInfo} url
  * @param {object} params
  * @return {Promise<object>} Promise

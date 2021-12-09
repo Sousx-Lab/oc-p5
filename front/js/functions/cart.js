@@ -1,6 +1,5 @@
-import { jsonFetchOrFlash } from './api.js'
 import {Storage} from './localStorage.js'
-import { API } from "../conf.js";
+
 export const Cart = {
     /**
      * @param {CartItem} obj 
@@ -80,7 +79,6 @@ export const Cart = {
     },
 
     /**
-     * 
      * @param {string} id 
      * @param {string} color 
      * @param {number} quantity
@@ -111,18 +109,7 @@ export const Cart = {
             return totalPrice
         }
     },
-
-    // async getItemPrice(id){
-    //     return await jsonFetchOrFlash(API.PRODUCT(id))
-    //     .then(product => {
-    //         if(Object.keys(product).length === 0){
-    //             console.log(product)
-    //             return
-    //         }
-    //         return product.price
-    //     })
-        
-    // }
+ 
 }
 
 /**

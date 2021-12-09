@@ -3,6 +3,7 @@ import {API} from '../conf.js';
 import { Product } from '../entity/product.js';
 
 /**
+ * fetch all product and append it in DOM
  * @param {HTMLElement} parentElement
  */
 export const ProductsCard = (parentElement) => {
@@ -18,6 +19,7 @@ export const ProductsCard = (parentElement) => {
     })
 
     /**
+     * HTML acrticle element with props
      * @param {Product} product 
      * @returns {string}
      */

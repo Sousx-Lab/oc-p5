@@ -1,5 +1,6 @@
 export const Storage = {
     /**
+     * Get stored items in localStorage
      * @param {string} key 
      * @returns {array | null}
     */
@@ -9,6 +10,7 @@ export const Storage = {
     },
 
     /**
+     * Set items in localStorage
      * @param {string} key 
      * @param {array} item
      * @returns {void}
@@ -18,6 +20,7 @@ export const Storage = {
     },
     
     /**
+     * Delete items in localStrage
      * @param {string} key
      * @returns {void}
     */

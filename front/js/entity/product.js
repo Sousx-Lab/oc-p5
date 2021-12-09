@@ -1,6 +1,7 @@
 import { FRONT_LOCATION } from "../conf.js"
 
 /**
+ * Product object model
  * @typedef Product
  * @property {string} _id
  * @property {string} name

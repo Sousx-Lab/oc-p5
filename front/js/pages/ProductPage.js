@@ -12,7 +12,7 @@ import { Cart, CartItem } from "../functions/cart.js";
  */
 
 /**
- * handle product details in product page
+ * fetch and handle product details in product page
  */
 export const ProductDetails = () => {
 
@@ -81,6 +81,7 @@ function insertProduct(product) {
 }
 
 /**
+ * Handle submit to add cart
  * @param {targetElems} target
  * @param {Product} product
  */
