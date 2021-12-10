@@ -163,6 +163,7 @@ function handleSubmit(){
                 method: 'POST',
                 body: formData
             }).then(resp =>{
+                Cart.deleteAll()
                 window.location.assign(FRONT_LOCATION.ORDER_CONFIRMATION_ROUTE(resp.orderId))
             })
         })

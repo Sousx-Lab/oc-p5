@@ -58,6 +58,14 @@ export const Cart = {
     },
 
     /**
+     * 
+     * @param {string} key 
+     */
+    deleteAll(key = 'cart'){
+        Storage.delete('cart')
+    },
+    
+    /**
      *@param {string|null} key 
      *@returns {array|null} Array[CatItem]
     */
