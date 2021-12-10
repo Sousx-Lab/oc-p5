@@ -1,7 +1,8 @@
 import {Flash} from './flash.js'
 
-const HTTP_NO_CONTENT = 204
 const HTTP_OK = 200
+const HTTP_CREATED = 201
+const HTTP_NO_CONTENT = 204
 
 /**
  * fatch url and return Json
@@ -33,7 +34,7 @@ async function jsonFetch (url, params = {}) {
       return null
   }
   const data = await response.json()
-  if (response.status === HTTP_OK) { 
+  if (response.status === HTTP_OK || response.status === HTTP_CREATED ) { 
     return data
   }
 

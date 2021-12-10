@@ -21,7 +21,7 @@ export const Product = {
     altTxt: "",
     colors: [],
     get url(){
-        return FRONT_LOCATION.PRODUCT_URL + this._id
+        return FRONT_LOCATION.PRODUCT_ROUTE(this._id)
 
     },
 }

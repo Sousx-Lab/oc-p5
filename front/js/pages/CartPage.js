@@ -1,6 +1,6 @@
 import { Cart, CartItem } from "../functions/cart.js"
 import { jsonFetchOrFlash } from "../functions/api.js"
-import { API } from "../conf.js";
+import { API, FRONT_LOCATION } from "../conf.js";
 import { Product } from "../entity/product.js";
 import { Flash } from "../functions/flash.js";
 import { Validator } from "../functions/validator.js";
@@ -17,6 +17,7 @@ export const CartPage = (containerCartItems) => {
     const cartItems = Cart.getItems()
     if (null === cartItems) {
         document.querySelector('h1').innerText += " est vide"
+        document.getElementById('order').disabled = true;
         return
     }
     fetchCartItems(cartItems, containerCartItems)
@@ -44,9 +45,10 @@ async function fetchCartItems(cart, containerCartItems) {
                     })
                     .then((product) => {
                         if (Object.keys(product).length === 0) {
-                            return
+                            
                         }
                         totalPrice += product.price * item.quantities
+                        /**Search in fetched product array and append it if not exist */
                         if(!fetchedProduct.find(e => e.id === item.id && e.color === item.color)){
                             fetchedProduct = [...fetchedProduct, {id: item.id, color: item.color, price: product.price}]
                         }
@@ -56,7 +58,7 @@ async function fetchCartItems(cart, containerCartItems) {
                         document.getElementById('totalQuantity').innerText = Cart.getTotalItemsQuantity()
                         /** Insert Total price */
                         document.getElementById('totalPrice').innerText = totalPrice
-    
+                        
                     })
             }
     
@@ -73,7 +75,7 @@ async function fetchCartItems(cart, containerCartItems) {
  */
 function handleDeleteItem() {
     let deleteButtons = document.querySelectorAll('.deleteItem')
-    deleteButtons.forEach(button => {
+    for(let button of deleteButtons) {
         button.addEventListener('click', function (el) {
             let article = el.target.closest('article')
 
@@ -100,7 +102,7 @@ function handleDeleteItem() {
             Flash.error(null, "Le produit que vous essayez de supprimer n'existe pas!")
             return
         })
-    })
+    }
 }
 
 /**
@@ -110,7 +112,7 @@ function handleDeleteItem() {
 function handleQuantityItem(){
 
     let quantityInput = document.getElementsByName('itemQuantity')
-        quantityInput.forEach(input => {
+        for(let input of quantityInput) {
             input.addEventListener('change', function(el){
                 let quantity = parseInt(el.target.value,10)
                     if(quantity instanceof Number && quantity <= 0){
@@ -133,7 +135,7 @@ function handleQuantityItem(){
                     
                     
             })
-        })
+        }
 }
 /**
  * Handle submit form order
@@ -142,44 +144,55 @@ function handleSubmit(){
     let form = document.querySelector('form')
         form.addEventListener('submit', function(e){
             e.preventDefault()
-            let formData = new FormData(form)
-            let formObj = {};
-            for (let pair of formData.entries()) {
-                formObj[pair[0]] = pair[1]
-            }
-            if(!validateForm(formObj)){
+
+            /**@type {object} formData */
+            let formData = {contact:''}
+            formData.contact =  Object.fromEntries(new FormData(form))
+
+            if(!validateForm(formData.contact)){
                 return false
             }
             
-            console.log('submited')
+            formData.products = []
+            /** insert cart product id in products formdata  */
+            for(let cartItems of Cart.getItems()) {
+                formData.products = [...formData.products, cartItems.id]
+            }
+            
+            jsonFetchOrFlash(API.ORDER, {
+                method: 'POST',
+                body: formData
+            }).then(resp =>{
+                window.location.assign(FRONT_LOCATION.ORDER_CONFIRMATION_ROUTE(resp.orderId))
+            })
         })
 }
 
 /**
  * 
- * @param {object} formObj
+ * @param {object} formData
  * @returns {boolean}
  */
-function validateForm(formObj){
+function validateForm(formData){
     let validate = true
 
-    if(false === Validator.lettres(formObj.firstName)){
+    if(false === Validator.lettres(formData.firstName)){
         document.getElementById('firstNameErrorMsg').innerText =
-        `Le Prénom ${formObj.firstName} n'est pas valide !`;
+        `Le Prénom ${formData.firstName} n'est pas valide !`;
         validate = false
     }else{
         document.getElementById('firstNameErrorMsg').innerText = ''
     }
 
-    if(false === Validator.lettres(formObj.lastName)){
+    if(false === Validator.lettres(formData.lastName)){
         document.getElementById('lastNameErrorMsg').innerText = 
-        `Le Nom ${formObj.lastName} n'est pas valide !`
+        `Le Nom ${formData.lastName} n'est pas valide !`
         validate = false
     }else{
         document.getElementById('lastNameErrorMsg').innerText = ''
     }
 
-    if(false === Validator.notBlank(formObj.address)){
+    if(false === Validator.notBlank(formData.address)){
         document.getElementById('addressErrorMsg').innerText = 
         `L'adresse ne doit pas étre vide !`
         validate = false
@@ -187,7 +200,7 @@ function validateForm(formObj){
         document.getElementById('addressErrorMsg').innerText = ''
     }
 
-    if(false === Validator.notBlank(formObj.city)){
+    if(false === Validator.notBlank(formData.city)){
         document.getElementById('cityErrorMsg').innerText = 
         `La ville ne doit pas étre vide !`
         validate= false
@@ -195,9 +208,9 @@ function validateForm(formObj){
         document.getElementById('cityErrorMsg').innerText = ''
     }
 
-    if(false === Validator.email(formObj.email)){
+    if(false === Validator.email(formData.email)){
         document.getElementById('emailErrorMsg').innerText = 
-        `L'adresse email ${formObj.email} n'est pas valide !`;
+        `L'adresse email ${formData.email} n'est pas valide !`;
         validate = false
     }else{
         document.getElementById('emailErrorMsg').innerText = ''

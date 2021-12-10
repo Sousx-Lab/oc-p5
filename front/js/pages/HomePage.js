@@ -8,14 +8,16 @@ import { Product } from '../entity/product.js';
  */
 export const ProductsCard = (parentElement) => {
    
-    jsonFetchOrFlash(API.PRODUCTS, {method: 'GET'})
+    jsonFetchOrFlash(API.PRODUCTS, 
+        {method: 'GET'
+    })
     .then(function(data) {
         if(Object.keys(data).length === 0){
             return;
         }
-        data.map((p) =>{
+        for(let p of data){
             parentElement.insertAdjacentHTML('beforeend', Card(Object.assign(Product, p)))
-        })
+        }
     })
 
     /**

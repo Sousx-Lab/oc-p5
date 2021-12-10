@@ -16,8 +16,7 @@ import { Cart, CartItem } from "../functions/cart.js";
  */
 export const ProductDetails = () => {
 
-    let query = window.location.search
-    const searchParams = new URLSearchParams(query);
+    const searchParams = new URLSearchParams(window.location.search);
 
     let id = searchParams.get('id')
     if (!id) {
