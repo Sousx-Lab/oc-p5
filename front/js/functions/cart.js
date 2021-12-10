@@ -8,7 +8,8 @@ export const Cart = {
     addItem(obj) {
         let currentItems = this.getItems('cart')
         if (currentItems instanceof Array ) {
-            currentItems.forEach(e =>{
+
+            for(let e of currentItems){
                 
                 if (e.id === obj.id && e.color !== obj.color && 
                     currentItems.find(({ color }) => color === obj.color) === undefined) {                
@@ -24,7 +25,7 @@ export const Cart = {
                     currentItems = [...currentItems, obj]
                  }
                 
-            })
+            }
            
             Storage.set('cart', currentItems)
             return
@@ -39,7 +40,9 @@ export const Cart = {
     deleteItem(id, color){
         let currentItems = this.getItems('cart')
         if(currentItems instanceof Array && currentItems.length > 0){
+
             let itemIndex = currentItems.findIndex(item => item.id === id && item.color === color)
+
             if( itemIndex >= 0){
                 let deltedItem = currentItems[itemIndex]
                 currentItems.splice(itemIndex, 1)
@@ -70,9 +73,9 @@ export const Cart = {
         let currentItems = this.getItems('cart') 
         let quantities = 0;
         if(currentItems instanceof Array && currentItems.length > 0){
-                currentItems.map(e => {
+                for(let e of currentItems)  {
                 quantities += e.quantities
-            })
+            }
             return quantities
         }
         return quantities
@@ -86,7 +89,9 @@ export const Cart = {
      */
     updateItemQuantity(id, color, quantity, totalPrice, price){
         let currentItems = this.getItems('cart')
+
         if(currentItems instanceof Array && currentItems.length > 0){
+            
             let itemIndex = currentItems.findIndex(item => item.id === id && item.color === color)
             if(itemIndex < 0){
                 return
