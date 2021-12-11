@@ -1,34 +1,55 @@
 
-export const Validator = {
+export class Validator  {
     
+    constructor(){
+        this.isValide = true
+    }
     /**
      * @param {string} value 
-     * @returns 
+     * @returns {string}
      */
     email(value){
         const mailRegex = new RegExp(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)
 
-        return mailRegex.test(value) ?? false
-    },
+        if(false === mailRegex.test(value)){
+            this.isValide = false
+            return `L'email "${value}" n'est pas un email valide !`;
+        }
+        return '';
+    }
 
     /**
-     * @param {string} value 
+     * @param {string} value
+     * @param {string} valueName
      * @returns 
      */
-    lettres(value){
+    lettres(value, valueName){
         const lettersRegex = new RegExp(/^[A-Za-z]+$/)
 
-        return lettersRegex.test(value) ?? false
+        if(false === lettersRegex.test(value)){
+            this.isValide = false
+            return `${valueName} "${value}" ne doit contenir que des lettres !`
+        }
+        return ''
         
-    },
+    }
 
     /**
-     * @param {string} value 
+     * @param {string} value
+     *  @param {string} valueName 
      * @returns 
      */
-    notBlank(value){
+    notBlank(value, valueName){
         const notBlankRegex = new RegExp(/([^\s])/)
 
-        return notBlankRegex.test(value) ?? false
+        if(false === notBlankRegex.test(value)){
+            this.isValide = false
+            return `${valueName} ne doit pas étre vide !`
+        }
+        return ''
+    }
+
+    validate(){
+        return this.isValide
     }
 }

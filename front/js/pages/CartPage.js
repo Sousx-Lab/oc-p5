@@ -175,49 +175,21 @@ function handleSubmit(){
  * @returns {boolean}
  */
 function validateForm(formData){
-    let validate = true
-
-    if(false === Validator.lettres(formData.firstName)){
-        document.getElementById('firstNameErrorMsg').innerText =
-        `Le Prénom ${formData.firstName} n'est pas valide !`;
-        validate = false
-    }else{
-        document.getElementById('firstNameErrorMsg').innerText = ''
-    }
-
-    if(false === Validator.lettres(formData.lastName)){
-        document.getElementById('lastNameErrorMsg').innerText = 
-        `Le Nom ${formData.lastName} n'est pas valide !`
-        validate = false
-    }else{
-        document.getElementById('lastNameErrorMsg').innerText = ''
-    }
-
-    if(false === Validator.notBlank(formData.address)){
-        document.getElementById('addressErrorMsg').innerText = 
-        `L'adresse ne doit pas étre vide !`
-        validate = false
-    }else{
-        document.getElementById('addressErrorMsg').innerText = ''
-    }
-
-    if(false === Validator.notBlank(formData.city)){
-        document.getElementById('cityErrorMsg').innerText = 
-        `La ville ne doit pas étre vide !`
-        validate= false
-    }else{
-        document.getElementById('cityErrorMsg').innerText = ''
-    }
-
-    if(false === Validator.email(formData.email)){
-        document.getElementById('emailErrorMsg').innerText = 
-        `L'adresse email ${formData.email} n'est pas valide !`;
-        validate = false
-    }else{
-        document.getElementById('emailErrorMsg').innerText = ''
-    }
     
-    return validate
+    const validator = new Validator()
+
+    document.getElementById('firstNameErrorMsg').innerText = validator.lettres(formData.firstName, 'Le Prénom')
+
+    document.getElementById('lastNameErrorMsg').innerText = validator.lettres(formData.lastName, 'Le Nom')
+   
+    document.getElementById('addressErrorMsg').innerText = validator.notBlank(formData.address, "L'adresse")
+
+    document.getElementById('cityErrorMsg').innerText = validator.notBlank(formData.city, 'La ville')
+
+    document.getElementById('emailErrorMsg').innerText = validator.email(formData.email)
+    
+    return validator.validate()
+
 }
 
 /**
