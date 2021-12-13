@@ -7,6 +7,7 @@ import { Validator } from "../functions/validator.js";
 
 
 let totalPrice = 0
+
 let fetchedProduct = []
 /**
  * @param {HTMLElement} containerCartItems
@@ -17,11 +18,32 @@ export const CartPage = (containerCartItems) => {
     const cartItems = Cart.getItems()
     if (null === cartItems) {
         document.querySelector('h1').innerText += " est vide"
-        document.getElementById('order').disabled = true;
+        document.getElementById('order').disabled = true
         return
     }
+
     fetchCartItems(cartItems, containerCartItems)
         .then(() => {
+            /** sort product by id */
+            fetchedProduct.sort(function(a, b){
+                if ( a.id < b.id ){
+                    return -1;
+                  }
+                  if ( a.id > b.id ){
+                    return 1;
+                  }
+                  return 0;
+            })
+            
+            for(let product of fetchedProduct){
+                // /** Insert product in DOM */
+                containerCartItems.insertAdjacentHTML('beforeend', CartArticle(product))
+                /** Insert Total item quantity */
+                document.getElementById('totalQuantity').innerText = Cart.getTotalItemsQuantity()
+                /** Insert Total price */
+                document.getElementById('totalPrice').innerText = totalPrice
+            }
+        }).then(()=> {
             handleDeleteItem()
             handleQuantityItem()
             handleSubmit()
@@ -35,33 +57,37 @@ export const CartPage = (containerCartItems) => {
  * @param {HTMLElement} containerCartItems 
  * @returns {Promise}
  */
-async function fetchCartItems(cart, containerCartItems) {
-
+async function fetchCartItems(cart) {
+    
     try {
         await Promise.all(cart.map(async (item) => {
-       
-            await jsonFetchOrFlash(API.PRODUCT(item.id), {
-                    method: 'GET'
+
+                await jsonFetchOrFlash(API.PRODUCT(item.id), {
+                        method: 'GET'
                     })
                     .then((product) => {
                         if (Object.keys(product).length === 0) {
-                            
+                            return
                         }
+
                         totalPrice += product.price * item.quantities
+
                         /**Search in fetched product array and append it if not exist */
-                        if(!fetchedProduct.find(e => e.id === item.id && e.color === item.color)){
-                            fetchedProduct = [...fetchedProduct, {id: item.id, color: item.color, price: product.price}]
+                        if (!fetchedProduct.find(e => e.id === item.id && e.color === item.color)) {
+                            fetchedProduct = [...fetchedProduct, {
+                                id: product._id,
+                                name: product.name,
+                                color: item.color,
+                                price: product.price,
+                                imageUrl: product.imageUrl,
+                                quantities: item.quantities,
+                                altTxt: product.altTxt
+                            }]
                         }
-                        /** Insert product in DOM */
-                        containerCartItems.insertAdjacentHTML('beforeend', CartArticle(product, item))
-                        /** Insert Total item quantity */
-                        document.getElementById('totalQuantity').innerText = Cart.getTotalItemsQuantity()
-                        /** Insert Total price */
-                        document.getElementById('totalPrice').innerText = totalPrice
-                        
+
                     })
             }
-    
+
         ))
     } catch (error) {
         Flash.error(null, "Une erreur s'est produite lors du la récupération des produits")
@@ -82,17 +108,17 @@ function handleDeleteItem() {
             /** deleted product from cart */
             let deletedItem =  Cart.deleteItem(article.dataset.id, article.dataset.color)
             
-            if (deletedItem) {
+            if (null !== deletedItem) {
                 /** find product price */
-                let price = fetchedProduct.find(e => e.id === article.dataset.id && e.color === article.dataset.color)
-                if(!price){
+                let deletedItemPrice = fetchedProduct.find(e => e.id === deletedItem.id && e.color === deletedItem.color)
+                if(!deletedItemPrice){
                     return
                 }
                 /** update total price */
-                totalPrice -= price.price * deletedItem.quantities
+                totalPrice -= deletedItemPrice.price * deletedItem.quantities
                 article.remove()
                 /** find & update fetchedProduct array */
-                let productIndex = fetchedProduct.findIndex(e => e.id === article.dataset.id && e.color === article.dataset.color)
+                let productIndex = fetchedProduct.findIndex(e => e.id === deletedItem.id && e.color === deletedItem.color)
                 fetchedProduct.splice(productIndex,1)
                 /** update total price & total quantity */
                 document.getElementById('totalQuantity').innerText = Cart.getTotalItemsQuantity()
@@ -121,7 +147,7 @@ function handleQuantityItem(){
                     }
                     let article = el.target.closest('article')
                     let price = fetchedProduct.find(e => e.id === article.dataset.id && e.color === article.dataset.color)
-
+                    
                     totalPrice = Cart.updateItemQuantity(
                         article.dataset.id, 
                         article.dataset.color, 
@@ -194,26 +220,26 @@ function validateForm(formData){
 
 /**
  * HTML article elements with props
- * @param {Product} product
+ * @param {object} product
  * @param {CartItem} cart
  * @returns {string}
  */
 const CartArticle = (product, cart) => {
 
-    return `<article class="cart__item" data-id="${cart.id}" data-color="${cart.color}">
+    return `<article class="cart__item" data-id="${product.id}" data-color="${product.color}">
             <div class="cart__item__img">
         <img src="${product.imageUrl}" alt="${product.altTxt}">
           </div>
       <div class="cart__item__content">
         <div class="cart__item__content__description">
           <h2>${product.name}</h2>
-              <p>${cart.color}</p>
+              <p>${product.color}</p>
           <p>${product.price} €</p>
         </div>
         <div class="cart__item__content__settings">
           <div class="cart__item__content__settings__quantity">
             <p>Qté : </p>
-            <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${cart.quantities}">
+            <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${product.quantities}">
           </div>
           <div class="cart__item__content__settings__delete">
             <p class="deleteItem">Supprimer</p>
