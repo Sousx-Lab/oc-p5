@@ -13,9 +13,9 @@ export class Validator  {
 
         if(false === mailRegex.test(value)){
             this.isValide = false
-            return `L'email "${value}" n'est pas un email valide !`;
+            return `L'email "${value}" n'est pas un email valide !`
         }
-        return '';
+        return ''
     }
 
     /**
@@ -36,7 +36,7 @@ export class Validator  {
 
     /**
      * @param {string} value
-     *  @param {string} valueName 
+     * @param {string} valueName 
      * @returns 
      */
     notBlank(value, valueName){
@@ -48,7 +48,10 @@ export class Validator  {
         }
         return ''
     }
-
+    /**
+     * return true if all input form is valide
+     * @returns {boolean}
+     */
     validate(){
         return this.isValide
     }

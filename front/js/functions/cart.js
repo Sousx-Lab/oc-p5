@@ -36,6 +36,7 @@ export const Cart = {
     /**
      * @param {string} id
      * @param {string} color
+     * @returns {object|null}
      */
     deleteItem(id, color){
         let currentItems = this.getItems('cart')
