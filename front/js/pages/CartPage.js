@@ -1,7 +1,6 @@
 import { Cart, CartItem } from "../functions/cart.js"
 import { jsonFetchOrFlash } from "../functions/api.js"
 import { API, FRONT_LOCATION } from "../conf.js";
-import { Product } from "../entity/product.js";
 import { Flash } from "../functions/flash.js";
 import { Validator } from "../functions/validator.js";
 
@@ -88,7 +87,7 @@ async function fetchCartItems(cart) {
 
         ))
     } catch (error) {
-        Flash.error(null, "Une erreur s'est produite lors du la récupération des produits")
+        Flash.error(null, "Une erreur s'est produite lors de la récupération des produits")
     }
    
 }
