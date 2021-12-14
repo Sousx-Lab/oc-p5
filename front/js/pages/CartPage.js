@@ -9,6 +9,7 @@ import { Validator } from "../functions/validator.js";
 let totalPrice = 0
 
 let fetchedProduct = []
+
 /**
  * @param {HTMLElement} containerCartItems
  */
@@ -36,7 +37,7 @@ export const CartPage = (containerCartItems) => {
             })
             
             for(let product of fetchedProduct){
-                // /** Insert product in DOM */
+                /** Insert product in DOM */
                 containerCartItems.insertAdjacentHTML('beforeend', CartArticle(product))
                 /** Insert Total item quantity */
                 document.getElementById('totalQuantity').innerText = Cart.getTotalItemsQuantity()
@@ -52,7 +53,7 @@ export const CartPage = (containerCartItems) => {
 }
 
 /**
- * Await fetching each product from Api and append it to DOM
+ * Await fetching each product from Api
  * @param {[CartItem]} cart 
  * @param {HTMLElement} containerCartItems 
  * @returns {Promise}
@@ -61,7 +62,6 @@ async function fetchCartItems(cart) {
     
     try {
         await Promise.all(cart.map(async (item) => {
-
                 await jsonFetchOrFlash(API.PRODUCT(item.id), {
                         method: 'GET'
                     })
@@ -69,9 +69,7 @@ async function fetchCartItems(cart) {
                         if (Object.keys(product).length === 0) {
                             return
                         }
-
                         totalPrice += product.price * item.quantities
-
                         /**Search in fetched product array and append it if not exist */
                         if (!fetchedProduct.find(e => e.id === item.id && e.color === item.color)) {
                             fetchedProduct = [...fetchedProduct, {
@@ -118,8 +116,8 @@ function handleDeleteItem() {
                 totalPrice -= deletedItemPrice.price * deletedItem.quantities
                 article.remove()
                 /** find & update fetchedProduct array */
-                let productIndex = fetchedProduct.findIndex(e => e.id === deletedItem.id && e.color === deletedItem.color)
-                fetchedProduct.splice(productIndex,1)
+                let deletedItemIndex = fetchedProduct.findIndex(e => e.id === deletedItem.id && e.color === deletedItem.color)
+                fetchedProduct.splice(deletedItemIndex, 1)
                 /** update total price & total quantity */
                 document.getElementById('totalQuantity').innerText = Cart.getTotalItemsQuantity()
                 document.getElementById('totalPrice').innerText = totalPrice = totalPrice
@@ -140,20 +138,23 @@ function handleQuantityItem(){
     let quantityInput = document.getElementsByName('itemQuantity')
         for(let input of quantityInput) {
             input.addEventListener('change', function(el){
-                let quantity = parseInt(el.target.value,10)
-                    if(quantity instanceof Number && quantity <= 0){
+                let quantity = parseInt(el.target.value, 10)
+                    if(!quantity instanceof Number || quantity <= 0){
                         Flash.info(null, "Quantité insuffisante!")
                         return
                     }
                     let article = el.target.closest('article')
-                    let price = fetchedProduct.find(e => e.id === article.dataset.id && e.color === article.dataset.color)
-                    
+                    let product = fetchedProduct.find(e => e.id === article.dataset.id && e.color === article.dataset.color)
+                    if(!product){
+                        Flash.error(null, "Le produit n'e")
+                        return;
+                    }
                     totalPrice = Cart.updateItemQuantity(
-                        article.dataset.id, 
-                        article.dataset.color, 
+                        product.id, 
+                        product.color, 
                         quantity, 
                         totalPrice, 
-                        price.price
+                        product.price
                     )
                     document.getElementById('totalPrice').innerText = totalPrice
                     
@@ -196,7 +197,7 @@ function handleSubmit(){
 }
 
 /**
- * 
+ * handle form vlidation
  * @param {object} formData
  * @returns {boolean}
  */
@@ -221,10 +222,9 @@ function validateForm(formData){
 /**
  * HTML article elements with props
  * @param {object} product
- * @param {CartItem} cart
  * @returns {string}
  */
-const CartArticle = (product, cart) => {
+const CartArticle = (product) => {
 
     return `<article class="cart__item" data-id="${product.id}" data-color="${product.color}">
             <div class="cart__item__img">
