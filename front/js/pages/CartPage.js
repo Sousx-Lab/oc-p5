@@ -10,6 +10,7 @@ let totalPrice = 0
 let fetchedProduct = []
 
 /**
+ * Main cart page function 
  * @param {HTMLElement} containerCartItems
  */
 export const CartPage = (containerCartItems) => {
@@ -52,7 +53,7 @@ export const CartPage = (containerCartItems) => {
 }
 
 /**
- * Await fetching each product from Api
+ * Await fetching each product in cart from Api
  * @param {[CartItem]} cart 
  * @param {HTMLElement} containerCartItems 
  * @returns {Promise}
@@ -129,7 +130,7 @@ function handleDeleteItem() {
 }
 
 /**
- * Handle item quantity and update total price & quantity
+ * Handle item quantity and update total item & total price
  * @returns {void}
  */
 function handleQuantityItem(){
@@ -164,7 +165,7 @@ function handleQuantityItem(){
         }
 }
 /**
- * Handle submit form order
+ * Handle submit order form
  */
 function handleSubmit(){
     let form = document.querySelector('form')
@@ -195,7 +196,7 @@ function handleSubmit(){
 }
 
 /**
- * handle form vlidation
+ * handle validation form
  * @param {object} formData
  * @returns {boolean}
  */
@@ -218,7 +219,7 @@ function validateForm(formData){
 }
 
 /**
- * HTML article elements with props
+ * HTML article elements
  * @param {object} product
  * @returns {string}
  */
