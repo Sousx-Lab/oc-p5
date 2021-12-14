@@ -173,14 +173,13 @@ function handleSubmit(){
             e.preventDefault()
 
             /**@type {object} formData */
-            let formData = {contact:''}
+            let formData = {contact:'', products: []}
             formData.contact =  Object.fromEntries(new FormData(form))
 
             if(!validateForm(formData.contact)){
                 return false
             }
             
-            formData.products = []
             /** insert cart product id in products formdata  */
             for(let cartItems of Cart.getItems()) {
                 formData.products = [...formData.products, cartItems.id]
