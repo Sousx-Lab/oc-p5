@@ -3,6 +3,7 @@ export class Validator  {
     
     constructor(){
         this.isValide = true
+        this.xss = new RegExp(/^<script[\s\S]*?>[\s\S]*?<\/script>/)
     }
     /**
      * @param {string} value 
@@ -41,8 +42,8 @@ export class Validator  {
      */
     notBlank(value, valueName){
         const notBlankRegex = new RegExp(/([^\s])/)
-
-        if(false === notBlankRegex.test(value)){
+        
+        if(false === notBlankRegex.test(value) || true === this.xss.test(value)){
             this.isValide = false
             return `${valueName} ne doit pas étre vide !`
         }
