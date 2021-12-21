@@ -121,6 +121,7 @@ function handleDeleteItem() {
                 /** update total price & total quantity */
                 document.getElementById('totalQuantity').innerText = Cart.getTotalItemsQuantity()
                 document.getElementById('totalPrice').innerText = totalPrice = totalPrice
+                Flash.info(null, 'Le produit a bien été supprimé!')
                 return;
             }
             Flash.error(null, "Le produit que vous essayez de supprimer n'existe pas!")
